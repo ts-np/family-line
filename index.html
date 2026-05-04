@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="家族LINE">
+<title>家族LINE</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  :root {
+    --green: #06C755;
+    --green-dark: #05a847;
+    --green-light: #e8faf0;
+    --bg: #f0f4f0;
+    --text: #1a1a1a;
+    --shadow: rgba(6,199,85,0.2);
+    --gray: #888;
+    --border: #e0e0e0;
+  }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(6,199,85,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(6,199,85,0.06) 0%, transparent 50%);
+  }
+
+  #mainScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 24px 20px 80px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+    animation: fadeDown 0.5s ease both;
+  }
+
+  .header-icon {
+    width: 64px; height: 64px;
+    background: var(--green);
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+
+  .header-icon svg { width:38px; height:38px; fill:white; }
+  .header h1 { font-size:22px; font-weight:900; color:var(--text); letter-spacing:0.04em; }
+  .header p  { font-size:15px; color:#666; margin-top:6px; }
+
+  .section-label {
+    font-size: 11px; font-weight: 700; color: var(--gray);
+    letter-spacing: 0.1em; margin-bottom: 10px;
+    width: 100%; max-width: 360px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  /* グループボタン */
+  .group-btn {
+    display: flex; align-items: center; gap: 16px;
+    background: white; border: none; border-radius: 20px;
+    padding: 20px 24px;
+    width: 100%; max-width: 360px;
+    cursor: pointer; text-decoration: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 24px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    animation: fadeUp 0.5s 0.05s ease both;
+    position: relative; overflow: hidden;
+  }
+
+  .group-btn::before {
+    content:''; position:absolute; inset:0;
+    background: var(--green-light); opacity:0; transition: opacity 0.15s;
+  }
+
+  .group-btn:active { transform:scale(0.97); box-shadow:0 2px 10px rgba(0,0,0,0.08); }
+  .group-btn:active::before { opacity:1; }
+
+  .group-icon {
+    width: 52px; height: 52px;
+    background: var(--green); border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; flex-shrink: 0;
+    position: relative; z-index: 1;
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+
+  .group-text { position: relative; z-index: 1; text-align: left; }
+  .group-name { font-size: 18px; font-weight: 900; color: var(--text); display: block; }
+  .group-sub  { font-size: 12px; color: var(--green); font-weight: 700; margin-top: 3px; display: block; }
+  .group-arrow { margin-left: auto; font-size: 18px; color: var(--green); position: relative; z-index: 1; }
+
+  /* 個人グリッド */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%; max-width: 360px;
+  }
+
+  .btn {
+    background: white; border: none; border-radius: 20px;
+    padding: 32px 16px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: transform 0.15s, box-shadow 0.15s;
+    animation: fadeUp 0.5s ease both;
+    position: relative; overflow: hidden;
+  }
+
+  .btn::before {
+    content:''; position:absolute; inset:0;
+    background: var(--green-light); opacity:0;
+    transition: opacity 0.15s;
+  }
+
+  .btn:active { transform:scale(0.95); box-shadow:0 2px 10px rgba(0,0,0,0.08); }
+  .btn:active::before { opacity:1; }
+
+  .btn-name {
+    font-size: 22px; font-weight: 900; color: var(--text);
+    letter-spacing: 0.06em; position: relative; z-index: 1;
+    margin-bottom: 10px;
+  }
+
+  .btn-label {
+    font-size: 12px; color: var(--green); font-weight: 700; letter-spacing: 0.08em;
+    background: var(--green-light); padding: 3px 12px; border-radius: 20px;
+    position: relative; z-index: 1;
+  }
+
+  #settingsBtn {
+    position: fixed; bottom: 28px; right: 24px;
+    background: white; border: none; border-radius: 50%;
+    width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    cursor: pointer; font-size: 22px;
+    transition: transform 0.15s; z-index: 10;
+  }
+  #settingsBtn:active { transform: scale(0.9); }
+
+  /* ===== SETTINGS SCREEN ===== */
+  #settingsScreen {
+    display: none; flex-direction: column;
+    min-height: 100vh; min-height: 100dvh;
+    background: white;
+  }
+
+  .settings-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: white; z-index: 5;
+  }
+
+  .back-btn {
+    background: var(--green-light); border: none; border-radius: 12px;
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 20px; flex-shrink: 0;
+  }
+
+  .settings-header h2 { font-size:18px; font-weight:900; color:var(--text); }
+
+  .settings-body { padding: 20px; overflow-y: auto; flex:1; }
+
+  .settings-section-title {
+    font-size: 12px; font-weight: 700; color: var(--gray);
+    letter-spacing: 0.1em; margin: 20px 0 10px;
+  }
+  .settings-section-title:first-child { margin-top: 0; }
+
+  .group-card, .person-card {
+    background: #fafafa; border: 1px solid var(--border);
+    border-radius: 16px; padding: 16px; margin-bottom: 16px;
+  }
+
+  .person-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .person-num {
+    font-size: 13px; font-weight: 700; color: var(--green);
+    background: var(--green-light); padding: 3px 10px; border-radius: 20px;
+  }
+
+  .delete-btn {
+    background: #fff0f0; border: none; border-radius: 10px;
+    padding: 5px 12px; font-size: 12px; color: #e53935;
+    font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+  }
+
+  .field-group { margin-bottom: 10px; }
+  .field-group:last-child { margin-bottom: 0; }
+
+  .field-label {
+    font-size: 12px; font-weight: 700; color: var(--gray);
+    margin-bottom: 5px; display: block; letter-spacing: 0.05em;
+  }
+
+  .field-input {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; font-size: 16px;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text); background: white;
+    outline: none; transition: border-color 0.15s;
+  }
+  .field-input:focus { border-color: var(--green); }
+
+  .add-btn {
+    width: 100%; background: var(--green-light);
+    border: 2px dashed var(--green); border-radius: 16px;
+    padding: 16px; font-size: 15px; font-weight: 700; color: var(--green);
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+    margin-bottom: 16px; transition: background 0.15s;
+  }
+  .add-btn:active { background: #d0f5e0; }
+
+  .hint {
+    font-size: 12px; color: #aaa;
+    text-align: center; margin-bottom: 16px; line-height: 1.7;
+  }
+
+  .save-btn {
+    width: 100%; background: var(--green); border: none; border-radius: 16px;
+    padding: 18px; font-size: 17px; font-weight: 900; color: white;
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+    letter-spacing: 0.05em; box-shadow: 0 4px 16px var(--shadow);
+    transition: background 0.15s, transform 0.1s; margin-bottom: 40px;
+  }
+  .save-btn:active { background: var(--green-dark); transform: scale(0.98); }
+
+  @keyframes fadeDown {
+    from { opacity:0; transform:translateY(-16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(20px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .s1{animation-delay:0.10s} .s2{animation-delay:0.15s}
+  .s3{animation-delay:0.20s} .s4{animation-delay:0.25s}
+  .s5{animation-delay:0.30s} .s6{animation-delay:0.35s}
+</style>
+</head>
+<body>
+
+<!-- メイン画面 -->
+<div id="mainScreen">
+  <div class="header">
+    <div class="header-icon">
+      <svg viewBox="0 0 48 48"><path d="M24 4C13 4 4 11.8 4 21.5c0 6.6 4.4 12.4 11 15.6-.5 1.7-1.7 6.2-1.9 7.1-.3 1.1.4 1.1.9.8.4-.2 5.8-3.9 8.1-5.5.6.1 1.3.1 1.9.1 11 0 20-7.8 20-17.5S35 4 24 4z"/></svg>
+    </div>
+    <h1>家族に連絡する</h1>
+    <p>話したい人をタップしてね</p>
+  </div>
+
+  <div class="section-label">👨‍👩‍👧‍👦 グループ</div>
+  <a id="groupBtn" href="#" class="group-btn">
+    <div class="group-icon">👨‍👩‍👧‍👦</div>
+    <div class="group-text">
+      <span class="group-name" id="groupNameDisplay">家族グループ</span>
+      <span class="group-sub">グループトークを開く</span>
+    </div>
+    <span class="group-arrow">›</span>
+  </a>
+
+  <div class="section-label">👤 個人</div>
+  <div class="grid" id="contactGrid"></div>
+
+  <button id="settingsBtn" onclick="openSettings()">⚙️</button>
+</div>
+
+<!-- 設定画面 -->
+<div id="settingsScreen">
+  <div class="settings-header">
+    <button class="back-btn" onclick="closeSettings()">←</button>
+    <h2>設定 — 家族の編集</h2>
+  </div>
+  <div class="settings-body">
+
+    <div class="settings-section-title">📣 グループ</div>
+    <div class="group-card">
+      <div class="field-group">
+        <label class="field-label">グループ名</label>
+        <input class="field-input" id="groupNameInput" type="text"
+          placeholder="例：家族グループ" maxlength="20">
+      </div>
+      <div class="field-group">
+        <label class="field-label">グループID（URLの末尾）</label>
+        <input class="field-input" id="groupIdInput" type="text"
+          placeholder="例：5TCUACRn7q"
+          autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+      </div>
+    </div>
+
+    <div class="settings-section-title">👤 個人</div>
+    <div id="personList"></div>
+    <button class="add-btn" onclick="addPerson()">＋ 家族を追加する</button>
+
+    <p class="hint">
+      個人ID：プロフィール → URLをコピー →「U」から始まる文字列<br>
+      グループID：グループ画面 → URLをコピー → 末尾の文字列
+    </p>
+    <button class="save-btn" onclick="saveSettings()">保存してトップに戻る</button>
+  </div>
+</div>
+
+<script>
+  const DEFAULT_GROUP  = { name: '家族グループ', groupId: '5TCUACRn7q' };
+  const DEFAULT_PEOPLE = [
+    { name: '智子',  lineId: 'U1111111111111111111111111111111a' },
+    { name: '太郎',  lineId: 'U2222222222222222222222222222222b' },
+    { name: '花子',  lineId: 'U3333333333333333333333333333333c' },
+    { name: '次郎',  lineId: 'U4444444444444444444444444444444d' },
+  ];
+
+  function loadGroup()  {
+    try { const s = localStorage.getItem('lineFamilyGroup');  return s ? JSON.parse(s) : DEFAULT_GROUP;  } catch(e) { return DEFAULT_GROUP; }
+  }
+  function loadPeople() {
+    try { const s = localStorage.getItem('lineFamilyPeople'); return s ? JSON.parse(s) : DEFAULT_PEOPLE; } catch(e) { return DEFAULT_PEOPLE; }
+  }
+  function saveGroup(g)  { localStorage.setItem('lineFamilyGroup',  JSON.stringify(g)); }
+  function savePeople(p) { localStorage.setItem('lineFamilyPeople', JSON.stringify(p)); }
+
+  function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderMain() {
+    const group  = loadGroup();
+    const people = loadPeople();
+
+    document.getElementById('groupNameDisplay').textContent = group.name;
+    document.getElementById('groupBtn').href = `line://ti/g/${group.groupId}`;
+
+    const grid = document.getElementById('contactGrid');
+    grid.innerHTML = '';
+    people.forEach((p, i) => {
+      const cls = `s${Math.min(i+1,6)}`;
+      const a = document.createElement('a');
+      a.className = `btn ${cls}`;
+      a.href = `line://ti/p/${p.lineId}`;
+      a.innerHTML = `
+        <span class="btn-name">${esc(p.name)}</span>
+        <span class="btn-label">トーク</span>`;
+      grid.appendChild(a);
+    });
+  }
+
+  function renderSettings() {
+    const group  = loadGroup();
+    const people = loadPeople();
+
+    document.getElementById('groupNameInput').value = group.name;
+    document.getElementById('groupIdInput').value   = group.groupId;
+
+    const list = document.getElementById('personList');
+    list.innerHTML = '';
+    people.forEach((p, i) => {
+      const card = document.createElement('div');
+      card.className = 'person-card';
+      card.innerHTML = `
+        <div class="person-card-header">
+          <span class="person-num">${i+1}人目</span>
+          <button class="delete-btn" onclick="deletePerson(${i})">削除</button>
+        </div>
+        <div class="field-group">
+          <label class="field-label">名前</label>
+          <input class="field-input name-input" type="text"
+            value="${esc(p.name)}" placeholder="例：智子" maxlength="10">
+        </div>
+        <div class="field-group">
+          <label class="field-label">LINE ユーザーID（Uから始まる）</label>
+          <input class="field-input id-input" type="text"
+            value="${esc(p.lineId)}" placeholder="例：Uabcdef1234..."
+            autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+        </div>`;
+      list.appendChild(card);
+    });
+  }
+
+  function openSettings() {
+    renderSettings();
+    document.getElementById('mainScreen').style.display     = 'none';
+    document.getElementById('settingsScreen').style.display = 'flex';
+  }
+
+  function closeSettings() {
+    document.getElementById('settingsScreen').style.display = 'none';
+    document.getElementById('mainScreen').style.display     = 'flex';
+  }
+
+  function collectInputs() {
+    return [...document.querySelectorAll('.person-card')].map(card => ({
+      name:   card.querySelector('.name-input').value.trim(),
+      lineId: card.querySelector('.id-input').value.trim(),
+    }));
+  }
+
+  function addPerson() {
+    const people = collectInputs();
+    people.push({ name: '', lineId: '' });
+    savePeople(people);
+    renderSettings();
+    setTimeout(() => {
+      const cards = document.querySelectorAll('.person-card');
+      cards[cards.length-1]?.scrollIntoView({ behavior:'smooth', block:'center' });
+    }, 60);
+  }
+
+  function deletePerson(index) {
+    const people = collectInputs();
+    if (people.length <= 1) { alert('最低1人は必要です'); return; }
+    people.splice(index, 1);
+    savePeople(people);
+    renderSettings();
+  }
+
+  function saveSettings() {
+    const groupName = document.getElementById('groupNameInput').value.trim();
+    const groupId   = document.getElementById('groupIdInput').value.trim();
+    const people    = collectInputs();
+
+    if (!groupName) { alert('グループ名を入力してください'); return; }
+    if (!groupId)   { alert('グループIDを入力してください'); return; }
+    for (let i = 0; i < people.length; i++) {
+      if (!people[i].name)   { alert(`${i+1}人目の名前を入力してください`);    return; }
+      if (!people[i].lineId) { alert(`${i+1}人目のLINE IDを入力してください`); return; }
+    }
+
+    saveGroup({ name: groupName, groupId });
+    savePeople(people);
+    renderMain();
+    closeSettings();
+  }
+
+  renderMain();
+</script>
+</body>
+</html>
